@@ -63,6 +63,15 @@ UPDATE_PACKAGE "webdav2" "kenzok8/jell" "main" "pkg"
 UPDATE_PACKAGE "unishare" "kenzok8/jell" "main" "pkg"
 UPDATE_PACKAGE "luci-app-unishare" "kenzok8/jell" "main" "pkg"
 
+# quickstart
+UPDATE_PACKAGE "taskd" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "luci-lib-xterm" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "luci-lib-taskd" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "luci-app-store" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "quickstart" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "luci-app-quickstart" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "luci-app-istorex" "kenzok8/jell" "main" "pkg"
+
 # quickfile
 UPDATE_PACKAGE "quickfile" "huanchenshang/luci-app-quickfile" "main"
 
