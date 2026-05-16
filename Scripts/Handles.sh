@@ -172,8 +172,8 @@ EOF
 \t\$(INSTALL_DATA) ./files/99-distfeeds.conf \$(1)/etc/99-distfeeds.conf\n" $EMORTAL_DEF_DIR/Makefile
 
     sed -i "/exit 0/i\\
-[ -f '/etc/99-distfeeds.conf' ] && mv '/etc/99-distfeeds.conf' '/etc/opkg/distfeeds.conf'\n\
-sed -ri '/check_signature/s@^[^#]@#\&@' /etc/opkg.conf\n" $EMORTAL_DEF_DIR/files/99-default-settings
+[ -f \'/etc/99-distfeeds.conf\' ] && mv \'/etc/99-distfeeds.conf\' \'/etc/opkg/distfeeds.conf\'\n\
+sed -ri \'/check_signature/s@^[^#]@#&@\' /etc/opkg.conf\n" $EMORTAL_DEF_DIR/files/99-default-settings
 
     echo "opkg软件源配置已安装（aarch64_cortex-a53）!"
 else
