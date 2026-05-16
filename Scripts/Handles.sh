@@ -122,14 +122,17 @@ QS_MAKEFILE="../package/luci-app-quickstart/Makefile"
 STORE_MAKEFILE="../package/luci-app-store/Makefile"
 
 if [ -f "$QS_MAKEFILE" ]; then
-    sed -i 's/PKG_VERSION:=0\.8\.16-1/PKG_VERSION:=0.8.16/g' "$QS_MAKEFILE"
-    sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$QS_MAKEFILE"
+    # 1. 移除 PKG_VERSION 后面的 -X 连字符及后续数字（例如 2.0.1-4 变成 2.0.1）
+    sed -i -E 's/(PKG_VERSION:=([0-9.]+))-[0-9]+/\1/g' "$QS_MAKEFILE"
+    # 2. 无论原本 PKG_RELEASE 后面是什么数字或字符，统一强制修改为 1
+    sed -i -E 's/(PKG_RELEASE:=).*/\11/g' "$QS_MAKEFILE"
     echo "luci-app-quickstart版本号已修复!"
 fi
 
 if [ -f "$STORE_MAKEFILE" ]; then
-    sed -i 's/PKG_VERSION:=0\.1\.27-1/PKG_VERSION:=0.1.27/g' "$STORE_MAKEFILE"
-    sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$STORE_MAKEFILE"
+    # 同上
+    sed -i -E 's/(PKG_VERSION:=([0-9.]+))-[0-9]+/\1/g' "$STORE_MAKEFILE"
+    sed -i -E 's/(PKG_RELEASE:=).*/\11/g' "$STORE_MAKEFILE"
     echo "luci-app-store版本号已修复!"
 fi
 
