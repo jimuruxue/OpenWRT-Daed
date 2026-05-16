@@ -117,6 +117,22 @@ else
 	exit 1
 fi
 
+#修复quickstart/store版本号格式
+QS_MAKEFILE="../package/luci-app-quickstart/Makefile"
+STORE_MAKEFILE="../package/luci-app-store/Makefile"
+
+if [ -f "$QS_MAKEFILE" ]; then
+    sed -i 's/PKG_VERSION:=0\.8\.16-1/PKG_VERSION:=0.8.16/g' "$QS_MAKEFILE"
+    sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$QS_MAKEFILE"
+    echo "luci-app-quickstart版本号已修复!"
+fi
+
+if [ -f "$STORE_MAKEFILE" ]; then
+    sed -i 's/PKG_VERSION:=0\.1\.27-1/PKG_VERSION:=0.1.27/g' "$STORE_MAKEFILE"
+    sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$STORE_MAKEFILE"
+    echo "luci-app-store版本号已修复!"
+fi
+
 #修复quickstart温度显示
 QUICKSTART_FILE="../package/luci-app-quickstart/luasrc/controller/istore_backend.lua"
 QUICKSTART_URL="https://gist.githubusercontent.com/puteulanus/1c180fae6bccd25e57eb6d30b7aa28aa/raw/istore_backend.lua"
@@ -126,6 +142,13 @@ if wget -O "$QUICKSTART_FILE" "$QUICKSTART_URL"; then
 else
     echo "错误：无法下载quickstart文件,请检查URL和网络连接。"
 	exit 1
+fi
+
+#修复opkg检测
+OPKG_PATCH_SRC="$GITHUB_WORKSPACE/files/001-fix-provides-version-parsing.patch"
+OPKG_PATCH_DST="../package/system/opkg/patches/001-fix-provides-version-parsing.patch"
+if [ -f "$OPKG_PATCH_SRC" ]; then
+    install -Dm644 "$OPKG_PATCH_SRC" "$OPKG_PATCH_DST"
 fi
 
 # 安装opkg distfeeds
