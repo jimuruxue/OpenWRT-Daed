@@ -154,33 +154,31 @@ else
     echo "错误：未找到opkg补丁文件 $OPKG_PATCH_SRC"  # ← 新增失败提示
 fi
 
-# 安装opkg distfeeds
-#emortal_def_dir="$GITHUB_WORKSPACE/wrt/package/emortal/default-settings"
-#distfeeds_conf="$emortal_def_dir/files/etc/opkg/distfeeds.conf"
+#安装opkg软件源配置
+EMORTAL_DEF_DIR="../package/emortal/default-settings"
+DISTFEEDS_CONF="$EMORTAL_DEF_DIR/files/99-distfeeds.conf"
 
-#if [ -d "$emortal_def_dir" ] && [ ! -f "$distfeeds_conf" ]; then
-#    mkdir -p "$(dirname "$distfeeds_conf")"
+if [ -d "$EMORTAL_DEF_DIR" ] && [ ! -f "$DISTFEEDS_CONF" ]; then
+    cat <<'EOF' >"$DISTFEEDS_CONF"
+src/gz openwrt_base https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/base/
+src/gz openwrt_luci https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/luci/
+src/gz openwrt_packages https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/packages/
+src/gz openwrt_routing https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/routing/
+src/gz openwrt_telephony https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/telephony/
+EOF
 
-#    cat <<'EOF' >"$distfeeds_conf"
-#src/gz immortalwrt_base https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/base
-#src/gz immortalwrt_luci https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/luci
-#src/gz immortalwrt_packages https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/packages
-#src/gz immortalwrt_routing https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/routing
-#src/gz immortalwrt_telephony https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/telephony
-#EOF
+    sed -i "/define Package\/default-settings\/install/a\\
+\\t\$(INSTALL_DIR) \$(1)/etc\\n\
+\t\$(INSTALL_DATA) ./files/99-distfeeds.conf \$(1)/etc/99-distfeeds.conf\n" $EMORTAL_DEF_DIR/Makefile
 
-#    # 把 distfeeds.conf 安装到正确的 /etc/opkg/ 目录
-#    sed -i "/define Package\/default-settings\/install/a\\
-#\t\$(INSTALL_DIR) \$(1)/etc/opkg\n\
-#\t\$(INSTALL_DATA) ./files/etc/opkg/distfeeds.conf \$(1)/etc/opkg/distfeeds.conf\n" "$emortal_def_dir/Makefile"
+    sed -i "/exit 0/i\\
+[ -f '/etc/99-distfeeds.conf' ] && mv '/etc/99-distfeeds.conf' '/etc/opkg/distfeeds.conf'\n\
+sed -ri '/check_signature/s@^[^#]@#\&@' /etc/opkg.conf\n" $EMORTAL_DEF_DIR/files/99-default-settings
 
-#    # 在 firstboot/postinit 时禁用签名校验（只注释掉 check_signature 行，避免误操作）
-#    sed -i "/exit 0/i\\
-# 禁用 opkg 签名校验（适用于 snapshot + 第三方源）\n\
-#[ -f /etc/opkg.conf ] && sed -i '/^[[:space:]]*option[[:space:]]+check_signature/s/^/#/' /etc/opkg.conf\n" "$emortal_def_dir/files/99-default-settings"
-
-#    echo "ImmortalWrt 24.10-SNAPSHOT 软件源（aarch64_cortex-a53）已配置，并已禁用签名校验！"
-#fi
+    echo "opkg软件源配置已安装（aarch64_cortex-a53）!"
+else
+    echo "错误：未找到default-settings目录或软件源配置已存在，跳过！"
+fi
 
 #修改CPU 性能优化调节名称显示
 cpu_path="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-cpufreq"
