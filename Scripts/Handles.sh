@@ -149,6 +149,9 @@ OPKG_PATCH_SRC="$GITHUB_WORKSPACE/files/001-fix-provides-version-parsing.patch"
 OPKG_PATCH_DST="../package/system/opkg/patches/001-fix-provides-version-parsing.patch"
 if [ -f "$OPKG_PATCH_SRC" ]; then
     install -Dm644 "$OPKG_PATCH_SRC" "$OPKG_PATCH_DST"
+    echo "opkg Provides版本解析补丁已应用!"   # ← 新增成功提示
+else
+    echo "错误：未找到opkg补丁文件 $OPKG_PATCH_SRC"  # ← 新增失败提示
 fi
 
 # 安装opkg distfeeds
