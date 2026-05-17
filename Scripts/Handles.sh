@@ -163,6 +163,14 @@ EOF
 
 echo "opkg.conf 注入成功，且签名检查已默认关闭!"
 
+# 拦截官方追加软件源
+BASE_FILES_MAKEFILE="./base-files/Makefile"
+
+if [ -f "$BASE_FILES_MAKEFILE" ]; then
+    sed -i 's/.*FeedSourcesAppendOPKG.*/\t\techo "Skip official feeds"; \\/' "$BASE_FILES_MAKEFILE"
+    echo "已成功安全拦截 base-files 中的 FeedSourcesAppendOPKG 追加逻辑！"
+fi
+
 #修改CPU 性能优化调节名称显示
 cpu_path="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-cpufreq"
 po_file="$cpu_path/po/zh_Hans/cpufreq.po"
