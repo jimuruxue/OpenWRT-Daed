@@ -117,6 +117,20 @@ else
 	exit 1
 fi
 
+# 修复 luci-app-store/istorex 依赖版本限制
+STORE_MAKEFILE="../package/luci-app-store/Makefile"
+ISTOREX_MAKEFILE="../package/luci-app-istorex/Makefile"
+
+if [ -f "$STORE_MAKEFILE" ]; then
+    sed -i -E 's/luci-lib-taskd \(>=[^)]+\)/luci-lib-taskd/g' "$STORE_MAKEFILE"
+    echo "luci-app-store 依赖版本限制已移除!"
+fi
+
+if [ -f "$ISTOREX_MAKEFILE" ]; then
+    sed -i -E 's/luci-lib-taskd \(>=[^)]+\)/luci-lib-taskd/g' "$ISTOREX_MAKEFILE"
+    echo "luci-app-istorex 依赖版本限制已移除!"
+fi
+
 #修复quickstart温度显示
 QUICKSTART_FILE="../package/luci-app-quickstart/luasrc/controller/istore_backend.lua"
 QUICKSTART_URL="https://gist.githubusercontent.com/puteulanus/1c180fae6bccd25e57eb6d30b7aa28aa/raw/istore_backend.lua"
