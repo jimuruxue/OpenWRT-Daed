@@ -138,31 +138,30 @@ else
     echo "错误：未找到opkg补丁文件 $OPKG_PATCH_SRC"  # ← 新增失败提示
 fi
 
-#安装opkg软件源配置
-EMORTAL_DEF_DIR="../package/emortal/default-settings"
-DISTFEEDS_CONF="$EMORTAL_DEF_DIR/files/99-distfeeds.conf"
+#替换 opkg 软件源
+TARGET_FEED_DIR="./base-files/files/etc/opkg"
+mkdir -p "$TARGET_FEED_DIR"
 
-if [ -d "$EMORTAL_DEF_DIR" ] && [ ! -f "$DISTFEEDS_CONF" ]; then
-    cat <<'EOF' >"$DISTFEEDS_CONF"
-src/gz openwrt_base https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/base/
-src/gz openwrt_luci https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/luci/
-src/gz openwrt_packages https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/packages/
-src/gz openwrt_routing https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/routing/
-src/gz openwrt_telephony https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/telephony/
+cat <<'EOF' >"$TARGET_FEED_DIR/distfeeds.conf"
+src/gz openwrt_base https://mirrors.pku.edu.cn/immortalwrt/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/base/
+src/gz openwrt_luci https://mirrors.pku.edu.cn/immortalwrt/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/luci/
+src/gz openwrt_packages https://mirrors.pku.edu.cn/immortalwrt/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/packages/
+src/gz openwrt_routing https://mirrors.pku.edu.cn/immortalwrt/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/routing/
+src/gz openwrt_telephony https://mirrors.pku.edu.cn/immortalwrt/releases/24.10-SNAPSHOT/packages/aarch64_cortex-a53/telephony/
 EOF
 
-    sed -i "/define Package\/default-settings\/install/a\\
-\\t\$(INSTALL_DIR) \$(1)/etc\\n\
-\t\$(INSTALL_DATA) ./files/99-distfeeds.conf \$(1)/etc/99-distfeeds.conf\n" $EMORTAL_DEF_DIR/Makefile
+echo "已成功将默认软件源替换为 24.10-SNAPSHOT!"
 
-    sed -i "/exit 0/i\\
-[ -f \'/etc/99-distfeeds.conf\' ] && mv \'/etc/99-distfeeds.conf\' \'/etc/opkg/distfeeds.conf\'\n\
-sed -ri \'/check_signature/s@^[^#]@#&@\' /etc/opkg.conf\n" $EMORTAL_DEF_DIR/files/99-default-settings
+mkdir -p "./base-files/files/etc"
+cat <<'EOF' >"./base-files/files/etc/opkg.conf"
+dest root /
+dest ram /tmp
+lists_dir ext /var/opkg-lists
+option overlay_root /overlay
+#option check_signature
+EOF
 
-    echo "opkg软件源配置已安装（aarch64_cortex-a53）!"
-else
-    echo "错误：未找到default-settings目录或软件源配置已存在，跳过！"
-fi
+echo "opkg.conf 注入成功，且签名检查已默认关闭!"
 
 #修改CPU 性能优化调节名称显示
 cpu_path="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-cpufreq"
