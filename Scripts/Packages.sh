@@ -59,18 +59,18 @@ UPDATE_PACKAGE "luci-app-daed" "QiuSimons/luci-app-daed" "kix"
 #UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
 
 # unishare
-UPDATE_PACKAGE "webdav2" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "unishare" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-app-unishare" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "webdav2" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "unishare" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-app-unishare" "kenzok8/small-package" "main" "pkg"
 
 # quickstart
-UPDATE_PACKAGE "taskd" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-lib-xterm" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-lib-taskd" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-app-store" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "quickstart" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-app-quickstart" "kenzok8/jell" "main" "pkg"
-UPDATE_PACKAGE "luci-app-istorex" "kenzok8/jell" "main" "pkg"
+UPDATE_PACKAGE "taskd" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-lib-xterm" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-lib-taskd" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-app-store" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "quickstart" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-app-quickstart" "kenzok8/small-package" "main" "pkg"
+UPDATE_PACKAGE "luci-app-istorex" "kenzok8/small-package" "main" "pkg"
 
 # quickfile
 UPDATE_PACKAGE "quickfile" "huanchenshang/luci-app-quickfile" "main"
