@@ -47,7 +47,7 @@ if [ -f "$RUST_FILE" ]; then
 fi
 
 #修复DiskMan编译失败
-DM_FILE="../package/luci-app-diskman/applications/luci-app-diskman/Makefile"
+DM_FILE="./luci-app-diskman/applications/luci-app-diskman/Makefile"
 if [ -f "$DM_FILE" ]; then
 
 	sed -i 's/fs-ntfs/fs-ntfs3/g' $DM_FILE
@@ -118,7 +118,7 @@ else
 fi
 
 #修复quickstart温度显示
-QUICKSTART_FILE="../package/luci-app-quickstart/luasrc/controller/istore_backend.lua"
+QUICKSTART_FILE="./luci-app-quickstart/luasrc/controller/istore_backend.lua"
 QUICKSTART_URL="https://gist.githubusercontent.com/puteulanus/1c180fae6bccd25e57eb6d30b7aa28aa/raw/istore_backend.lua"
 
 if wget -O "$QUICKSTART_FILE" "$QUICKSTART_URL"; then
@@ -130,7 +130,7 @@ fi
 
 #修复opkg检测
 OPKG_PATCH_SRC="$GITHUB_WORKSPACE/files/001-fix-provides-version-parsing.patch"
-OPKG_PATCH_DST="../package/system/opkg/patches/001-fix-provides-version-parsing.patch"
+OPKG_PATCH_DST="./system/opkg/patches/001-fix-provides-version-parsing.patch"
 if [ -f "$OPKG_PATCH_SRC" ]; then
     install -Dm644 "$OPKG_PATCH_SRC" "$OPKG_PATCH_DST"
     echo "opkg Provides版本解析补丁已应用!"   # ← 新增成功提示
