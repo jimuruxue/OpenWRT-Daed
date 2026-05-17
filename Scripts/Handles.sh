@@ -117,25 +117,6 @@ else
 	exit 1
 fi
 
-#修复quickstart/store版本号格式
-QS_MAKEFILE="../package/luci-app-quickstart/Makefile"
-STORE_MAKEFILE="../package/luci-app-store/Makefile"
-
-if [ -f "$QS_MAKEFILE" ]; then
-    # 1. 移除 PKG_VERSION 后面的 -X 连字符及后续数字（例如 2.0.1-4 变成 2.0.1）
-    sed -i -E 's/(PKG_VERSION:=([0-9.]+))-[0-9]+/\1/g' "$QS_MAKEFILE"
-    # 2. 无论原本 PKG_RELEASE 后面是什么数字或字符，统一强制修改为 1
-    sed -i -E 's/(PKG_RELEASE:=).*/\11/g' "$QS_MAKEFILE"
-    echo "luci-app-quickstart版本号已修复!"
-fi
-
-if [ -f "$STORE_MAKEFILE" ]; then
-    # 同上
-    sed -i -E 's/(PKG_VERSION:=([0-9.]+))-[0-9]+/\1/g' "$STORE_MAKEFILE"
-    sed -i -E 's/(PKG_RELEASE:=).*/\11/g' "$STORE_MAKEFILE"
-    echo "luci-app-store版本号已修复!"
-fi
-
 #修复quickstart温度显示
 QUICKSTART_FILE="../package/luci-app-quickstart/luasrc/controller/istore_backend.lua"
 QUICKSTART_URL="https://gist.githubusercontent.com/puteulanus/1c180fae6bccd25e57eb6d30b7aa28aa/raw/istore_backend.lua"
