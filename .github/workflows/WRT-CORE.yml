@@ -40,10 +40,10 @@ on:
       WRT_TEST:
         required: false
         type: string
+
       WRT_ARCH:
         required: false
         type: string
-
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   WRT_CONFIG: ${{inputs.WRT_CONFIG}}
@@ -93,6 +93,7 @@ jobs:
         run: |
           sudo -E apt -yqq purge firefox
           sudo -E apt -yqq update
+          sudo -E apt -yqq full-upgrade
           sudo -E apt -yqq autoremove --purge
           sudo -E apt -yqq autoclean
           sudo -E apt -yqq clean
@@ -113,17 +114,20 @@ jobs:
           echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./Config/$WRT_CONFIG.txt)" >> $GITHUB_ENV
           echo "WRT_KVER=none" >> $GITHUB_ENV
           echo "WRT_LIST=none" >> $GITHUB_ENV
+
           echo "WRT_CI=$WRT_CI" >> $GITHUB_ENV
           [[ -z $WRT_ARCH ]] && {
             export WRT_ARCH=$(sed -n 's/.*_DEVICE_\(.*\)_DEVICE_.*/\1/p' $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt | head -n 1)
             echo "WRT_ARCH=$WRT_ARCH" >> $GITHUB_ENV
           }
           echo "$WRT_REPO/$WRT_BRANCH" > "$GITHUB_WORKSPACE/repo_flag"
-
       - name: Clone Code
         run: |
           git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+
           cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+
+          # GitHub Action 移除国内下载源
           PROJECT_MIRRORS_FILE="./scripts/projectsmirrors.json"
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
@@ -133,50 +137,36 @@ jobs:
         run: |
           find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
-      - name: Cache Toolchain
+      - name: Cache Dependencies
         uses: actions/cache@main
         with:
           path: |
             ./wrt/.ccache
             ./wrt/staging_dir/host*
             ./wrt/staging_dir/tool*
-          key: toolchain-${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}-${{ hashFiles('./Config/**') }}
+          key: ${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}-${{ env.WRT_DATE }}
           restore-keys: |
-            toolchain-${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}-
-            toolchain-${{ env.WRT_ARCH }}-
+            ${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}-
 
-      - name: Cache DL
-        uses: actions/cache@main
-        with:
-          path: ./wrt/dl
-          key: dl-${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}
-          restore-keys: |
-            dl-${{ env.WRT_ARCH }}-
-            dl-
-
-      - name: Refresh the Cache
+      - name: Refresh the cache
         run: |
           if [ -d "./wrt/staging_dir" ]; then
             find "./wrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
               find "$DIR" -type f -exec touch {} +
             done
-          fi
-
-      - name: Configure ccache
-        run: |
-          echo "CCACHE_DIR=$GITHUB_WORKSPACE/wrt/.ccache" >> $GITHUB_ENV
-          ccache -M 5G
-          ccache -z
+          fi            
 
       - name: Update Feeds
         run: |
           cd ./wrt/
+
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Custom Packages
         run: |
           cd ./wrt/package/
+
           $GITHUB_WORKSPACE/Scripts/Packages.sh
           $GITHUB_WORKSPACE/Scripts/Handles.sh
 
@@ -184,42 +174,41 @@ jobs:
         run: |
           . $GITHUB_WORKSPACE/Scripts/Function.sh
           cd ./wrt/
+
           generate_config && cat .config
+
           $GITHUB_WORKSPACE/Scripts/Settings.sh
-          make defconfig -j$(nproc)
+
+          make defconfig -j$(nproc) && make clean -j$(nproc)
 
       - name: Download Packages
         if: env.WRT_TEST != 'true'
         run: |
           cd ./wrt/
+
           make download -j$(nproc)
 
       - name: Compile Firmware
         if: env.WRT_TEST != 'true'
         run: |
           cd ./wrt/
-          export PATH="/usr/lib/ccache:$PATH"
-          make -j$(nproc) || make -j$(nproc) V=s
 
+          make -j$(nproc) || make -j$(nproc) V=s
       - name: Delete Old Cache
         run: |
-          for PREFIX in "toolchain-${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}-" \
-                        "dl-${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}"; do
-            gh cache list --key "$PREFIX" --json key,createdAt \
-              --jq 'sort_by(.createdAt) | reverse | .[2:] | .[].key' | \
-              while read -r key; do
-                gh cache delete "$key" || true
-              done
+          # 获取缓存列表并删除
+          gh cache list --key ${{ env.WRT_ARCH }}-${{ hashFiles('**/repo_flag') }}- --json key --jq '.[] | .key' | while read -r key; do
+            gh cache delete "$key"
           done
+          # 输出缓存状态
           echo "========cache status========"
-          echo "ccache: $(du -sh ./wrt/.ccache 2>/dev/null | cut -f 1)"
-          echo "ccache hit rate: $(ccache -s | grep -i 'hit rate' || echo 'N/A')"
-          echo "staging: $(du -sh ./wrt/staging_dir 2>/dev/null | cut -f 1)"
-          echo "dl: $(du -sh ./wrt/dl 2>/dev/null | cut -f 1)"
+          echo "ccache: $(du -sh ./wrt/.ccache | cut -f 1)"
+          echo "staging: $(du -sh ./wrt/staging_dir | cut -f 1)"
 
       - name: Machine Information
         run: |
           cd ./wrt/
+
           echo "======================="
           lscpu | grep -E "name|Core|Thread"
           echo "======================="
@@ -231,18 +220,25 @@ jobs:
       - name: Package Firmware
         run: |
           cd ./wrt/ && mkdir ./upload/
+
           cp -f ./.config ./upload/Config-"$WRT_CONFIG"-"$WRT_INFO"-"$WRT_BRANCH"-"$WRT_DATE".txt
+
           if [[ $WRT_TEST != 'true' ]]; then
             echo "WRT_KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)" >> $GITHUB_ENV
             echo "WRT_LIST=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^luci-(app|theme)[^ ]*' {} \; | tr '\n' ' ')" >> $GITHUB_ENV
+
             find ./bin/targets/ -iregex ".*\(buildinfo\|json\|sha256sums\|packages\)$" -exec rm -rf {} +
+
             for FILE in $(find ./bin/targets/ -type f -iname "*$WRT_TARGET*") ; do
               EXT=$(basename $FILE | cut -d '.' -f 2-)
               NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($WRT_TARGET\).*")
               NEW_FILE="$WRT_INFO"-"$WRT_BRANCH"-"$NAME"-"$WRT_DATE"."$EXT"
               mv -f $FILE ./upload/$NEW_FILE
             done
+
             find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
+
+            make clean -j$(nproc)
           fi
 
       - name: Release Firmware
