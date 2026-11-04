@@ -46,9 +46,9 @@ UPDATE_PACKAGE() {
 
 # UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
 # proxy
-UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
+#UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
 UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
-UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
+#UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-daed" "QiuSimons/luci-app-daed" "kix"
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "passwall2" "xiaorouji/openwrt-passwall2" "main" "pkg"
@@ -73,7 +73,7 @@ UPDATE_PACKAGE "luci-app-quickstart" "kenzok8/small-package" "main" "pkg"
 UPDATE_PACKAGE "luci-app-istorex" "kenzok8/small-package" "main" "pkg"
 
 # quickfile
-UPDATE_PACKAGE "quickfile" "huanchenshang/luci-app-quickfile" "main"
+UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
 #更新软件包版本
 UPDATE_VERSION() {
