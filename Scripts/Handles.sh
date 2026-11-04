@@ -1,14 +1,14 @@
 #!/bin/bash
 
 #修改argon主题设置
-ARGON_FILE="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-argon-config/root/etc/config/argon"
-DIY_FILE="$GITHUB_WORKSPACE/files/etc/config/argon"
-if [ -f "$ARGON_FILE" ]; then
- 
-    cp -f "$DIY_FILE" "$ARGON_FILE"
-
-	echo "argon主题参数设置成功!"
-fi
+#ARGON_FILE="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-argon-config/root/etc/config/argon"
+#DIY_FILE="$GITHUB_WORKSPACE/files/etc/config/argon"
+#if [ -f "$ARGON_FILE" ]; then
+# 
+#    cp -f "$DIY_FILE" "$ARGON_FILE"
+#
+#	echo "argon主题参数设置成功!"
+#fi
 
 #修改qca-nss-drv启动顺序
 NSS_DRV="../feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
@@ -47,7 +47,7 @@ if [ -f "$RUST_FILE" ]; then
 fi
 
 #修复DiskMan编译失败
-DM_FILE="./luci-app-diskman/applications/luci-app-diskman/Makefile"
+DM_FILE="../package/luci-app-diskman/applications/luci-app-diskman/Makefile"
 if [ -f "$DM_FILE" ]; then
 
 	sed -i 's/fs-ntfs/fs-ntfs3/g' $DM_FILE
@@ -179,7 +179,7 @@ else
 fi
 
 #修改Argon 主题设置名称显示
-argon_path="$GITHUB_WORKSPACE/wrt/feeds/luci/applications/luci-app-argon-config"
+argon_path="$GITHUB_WORKSPACE/wrt/feeds/luci/themes/luci-theme-argon"
 argonpo_file="$argon_path/po/zh_Hans/argon-config.po"
 
 if [ -d "$argon_path" ] && [ -f "$argonpo_file" ]; then
@@ -201,30 +201,30 @@ else
 fi
 
 #更换argon源
-argon_url="https://github.com/huanchenshang/luci-theme-argon.git"
-dst_theme_path="../feeds/luci/themes/luci-theme-argon"
-tmp_dir=$(mktemp -d)
-
-    git clone --depth 1 "$argon_url" "$tmp_dir"
-
-    rm -rf "$dst_theme_path"
-    rm -rf "$tmp_dir/.git"
-    mv "$tmp_dir" "$dst_theme_path"
-
-    echo "luci-theme-argon 更新完成"
+#argon_url="https://github.com/huanchenshang/luci-theme-argon.git"
+#dst_theme_path="../feeds/luci/themes/luci-theme-argon"
+#tmp_dir=$(mktemp -d)
+#
+#    git clone --depth 1 "$argon_url" "$tmp_dir"
+#
+#    rm -rf "$dst_theme_path"
+#    rm -rf "$tmp_dir/.git"
+#    mv "$tmp_dir" "$dst_theme_path"
+#
+#    echo "luci-theme-argon 更新完成"
 
 #修改argon背景图片
-theme_path="$GITHUB_WORKSPACE/wrt/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img"
-source_path="$GITHUB_WORKSPACE/images"
-source_file="$source_path/bg1.jpg"
-target_file="$theme_path/bg1.jpg"
-
-if [ -f "$source_file" ]; then
-    cp -f "$source_file" "$target_file"
-    echo "背景图片更新成功"
-else
-    echo "错误：未找到源图片文件"
-fi
+#theme_path="$GITHUB_WORKSPACE/wrt/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img"
+#source_path="$GITHUB_WORKSPACE/images"
+#source_file="$source_path/bg1.jpg"
+#target_file="$theme_path/bg1.jpg"
+#
+#if [ -f "$source_file" ]; then
+#    cp -f "$source_file" "$target_file"
+#    echo "背景图片更新成功"
+#else
+#    echo "错误：未找到源图片文件"
+#fi
 
 #修改automount自动加载和修复ntfs硬盘显示中文
 # 注意: 上游 fstools-2026.10.18 已重构 handle_mount(改用 mount_opts_get/exec_mount),
@@ -251,26 +251,26 @@ else
 fi
 
 #添加定时清理内存
-sh_dir="$GITHUB_WORKSPACE/wrt/package/base-files/files/etc/init.d"
-if [ -d "$sh_dir" ]; then
-    cat <<'EOF' >"$sh_dir/custom_task"
+#sh_dir="$GITHUB_WORKSPACE/wrt/package/base-files/files/etc/init.d"
+#if [ -d "$sh_dir" ]; then
+#    cat <<'EOF' >"$sh_dir/custom_task"
 #!/bin/sh /etc/rc.common
 # 设置启动优先级
-START=99
-
-boot() {
+#START=99
+#
+#boot() {
     # 重新添加缓存请求定时任务
-    sed -i '/drop_caches/d' /etc/crontabs/root
-    echo "15 3 * * * sync && echo 3 > /proc/sys/vm/drop_caches" >>/etc/crontabs/root
+#    sed -i '/drop_caches/d' /etc/crontabs/root
+#    echo "15 3 * * * sync && echo 3 > /proc/sys/vm/drop_caches" >>/etc/crontabs/root
     # 应用新的 crontab 配置
-    crontab /etc/crontabs/root
-}
-EOF
-    chmod +x "$sh_dir/custom_task"
-    echo "添加定时清理内存成功!"
-else
-    echo "添加定时清理内存出错"
-fi
+#    crontab /etc/crontabs/root
+#}
+#EOF
+#    chmod +x "$sh_dir/custom_task"
+#    echo "添加定时清理内存成功!"
+#else
+#    echo "添加定时清理内存出错"
+#fi
 
 #设置使用bbr加速
 BBR_CONF_PATH="$GITHUB_WORKSPACE/wrt/package/base-files/files/etc/sysctl.d/10-bbr.conf"
